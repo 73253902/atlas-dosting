@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dosting Toys — Catálogo de Pedidos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1A3A5C;
+  --azul2:#2A5080;
+  --dorado:#C9860A;
+  --verde:#16A34A;
+  --rojo:#DC2626;
+  --gris:#F4F6F9;
+  --gris2:#E8ECF2;
+  --texto:#1A1A2E;
+  --suave:#6B7280;
+  --blanco:#FFFFFF;
+  --sombra:0 2px 12px rgba(26,58,92,.12);
+  --radio:14px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--gris);color:var(--texto);min-height:100vh}
+
+/* HEADER */
+.header{background:var(--azul);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header-logo{display:flex;align-items:center;gap:10px}
+.logo-box{width:34px;height:34px;background:var(--dorado);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-size:15px;font-weight:700;color:#fff;line-height:1.1}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.55);font-weight:400}
+.header-carrito{display:flex;align-items:center;gap:8px}
+.btn-carrito{background:var(--dorado);color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
+.btn-carrito:hover{background:#A67009}
+.carrito-badge{background:#fff;color:var(--dorado);border-radius:50%;width:18px;height:18px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* BUSCADOR */
+.busqueda-wrap{background:var(--azul2);padding:12px 16px}
+.busqueda-inner{max-width:700px;margin:0 auto;position:relative}
+.busqueda-input{width:100%;padding:10px 16px 10px 40px;border-radius:10px;border:none;font-size:14px;outline:none;background:#fff}
+.busqueda-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--suave);font-size:16px}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:16px}
+.section-label{font-size:12px;font-weight:600;color:var(--suave);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding:0 2px}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+
+/* CARD */
+.prod-card{background:var(--blanco);border-radius:var(--radio);box-shadow:var(--sombra);overflow:hidden;transition:transform .15s,box-shadow .15s;cursor:pointer;border:2px solid transparent}
+.prod-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,58,92,.16)}
+.prod-card.activo{border-color:var(--azul)}
+.prod-img{aspect-ratio:1;background:var(--gris);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.prod-img img{width:100%;height:100%;object-fit:cover}
+.badge-var{position:absolute;top:6px;right:6px;background:var(--azul);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px}
+.prod-body{padding:10px}
+.prod-nombre{font-size:12px;font-weight:600;color:var(--texto);line-height:1.3;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-precio{font-size:13px;font-weight:700;color:var(--azul);margin-bottom:8px}
+.qty-row{display:flex;align-items:center;gap:0;border:1.5px solid var(--gris2);border-radius:8px;overflow:hidden}
+.qty-menos,.qty-mas{background:var(--gris);border:none;width:30px;height:28px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;color:var(--texto);flex-shrink:0}
+.qty-menos:hover,.qty-mas:hover{background:var(--gris2)}
+.qty-num{flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--texto)}
+.qty-num.positivo{color:var(--azul)}
+.btn-var{width:100%;padding:6px 8px;background:var(--gris);border:1.5px solid var(--gris2);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;color:var(--texto);transition:all .15s}
+.btn-var:hover{background:var(--azul);color:#fff;border-color:var(--azul)}
+.btn-var.activo{background:var(--azul);color:#fff;border-color:var(--azul)}
+
+/* LOADING */
+.loading{grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--suave)}
+.spinner{width:40px;height:40px;border:3px solid var(--gris2);border-top:3px solid var(--azul);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--suave)}
+
+/* MODAL VARIANTES */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center;padding:0}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:500px;padding:20px;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-titulo{font-size:16px;font-weight:700}
+.modal-cerrar{background:var(--gris);border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;margin-bottom:16px;background:var(--gris)}
+.variante-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gris2)}
+.variante-row:last-child{border-bottom:none}
+.variante-nombre{font-size:13px;flex:1}
+.variante-precio{font-size:13px;font-weight:700;color:var(--azul);margin:0 12px;white-space:nowrap}
+.variante-qty{display:flex;align-items:center;gap:0;border:1.5px solid var(--gris2);border-radius:8px;overflow:hidden}
+.v-menos,.v-mas{background:var(--gris);border:none;width:28px;height:26px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.v-num{width:28px;text-align:center;font-size:12px;font-weight:700}
+
+/* PANEL CARRITO */
+.carrito-panel{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:flex-end;justify-content:center}
+.carrito-panel.open{display:flex}
+.carrito-box{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:500px;padding:20px;max-height:85vh;overflow-y:auto}
+.carrito-titulo{font-size:17px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.carrito-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gris2);font-size:13px}
+.carrito-item:last-child{border-bottom:none}
+.carrito-item-nombre{flex:1;padding-right:8px}
+.carrito-item-qty{color:var(--suave);font-size:12px}
+.carrito-item-precio{font-weight:700;color:var(--azul)}
+.carrito-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-top:12px;padding-top:12px;border-top:2px solid var(--gris2)}
+.btn-pedido{width:100%;padding:13px;background:var(--verde);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px}
+.btn-vaciar{width:100%;padding:10px;background:var(--gris);color:var(--texto);border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+
+@media(max-width:480px){
+  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .prod-body{padding:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-box">🔧</div>
+    <div>
+      <div class="logo-text">Dosting Toys</div>
+      <div class="logo-sub">Catálogo de pedidos</div>
+    </div>
+  </div>
+  <div class="header-carrito">
+    <button class="btn-carrito" onclick="abrirCarrito()">
+      🛒 Pedido <span class="carrito-badge" id="badge-total">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- BUSCADOR -->
+<div class="busqueda-wrap">
+  <div class="busqueda-inner">
+    <span class="busqueda-icon">🔍</span>
+    <input class="busqueda-input" id="busqueda" type="text" placeholder="Buscar producto..." oninput="filtrar()">
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="section-label" id="section-label">Cargando catálogo...</div>
+  <div class="grid" id="grid">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div>Cargando productos desde Supabase...</div>
+    </div>
+  </div>
+  <div id="sentinel" style="height:40px;margin-top:8px"></div>
+</main>
+
+<!-- MODAL VARIANTES -->
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-titulo" id="modal-titulo">Seleccionar medida</div>
+      <button class="modal-cerrar" onclick="cerrarModal()">✕</button>
+    </div>
+    <img class="modal-img" id="modal-img" src="" alt="">
+    <div id="modal-variantes"></div>
+  </div>
+</div>
+
+<!-- PANEL CARRITO -->
+<div class="carrito-panel" id="carrito-panel" onclick="cerrarCarrito(event)">
+  <div class="carrito-box">
+    <div class="carrito-titulo">
+      🛒 Mi pedido
+      <button class="modal-cerrar" onclick="cerrarCarrito()">✕</button>
+    </div>
+    <div id="carrito-items"></div>
+    <div class="carrito-total"><span>Total</span><span id="carrito-total-precio">$0</span></div>
+    <button class="btn-pedido" onclick="enviarPedido()">✅ Enviar pedido por WhatsApp</button>
+    <button class="btn-vaciar" onclick="vaciarCarrito()">🗑 Vaciar pedido</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG SUPABASE ───────────────────────────────────────────
+var SUPABASE_URL = 'https://zjjuqwlsytjsnbzsdjmj.supabase.co';
+var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqanVxd2xzeXRqc25ienNkam1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NDM5NDIsImV4cCI6MjEwMDQxOTk0Mn0.24FQSY7NSv07OinZCOYtod3_BoU_8ZP0snBQPyokmQY';
+var EMPRESA_ID = '09fa64ca-7b34-488a-a162-5e4cf97beefa';
+
+// ── ESTADO ────────────────────────────────────────────────────
+var familias = [];
+var familias_filtradas = [];
+var carrito = {};
+var pagina = 0;
+var PAGINA_SIZE = 24;
+var cargando_pagina = false;
+var modal_familia = null;
+
+// ── FORMATEO ──────────────────────────────────────────────────
+function fmt(n){ return '$' + Math.round(n).toLocaleString('es-CO'); }
+
+// ── CARGAR DESDE SUPABASE ─────────────────────────────────────
+async function cargarDatos() {
+  try {
+    // 1. Cargar familias
+    var url_fam = SUPABASE_URL + '/rest/v1/families?empresa_id=eq.' + EMPRESA_ID
+      + '&select=id,family_name,image_url&order=family_name.asc&limit=1000&apikey=' + ANON_KEY;
+    var r1 = await fetch(url_fam, { headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY } });
+    var data_fam = await r1.json();
+
+    // 2. Cargar SKUs
+    var url_sku = SUPABASE_URL + '/rest/v1/skus?empresa_id=eq.' + EMPRESA_ID
+      + '&select=sku,description,precio_venta,family_id&limit=2000&apikey=' + ANON_KEY;
+    var r2 = await fetch(url_sku, { headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY } });
+    var data_sku = await r2.json();
+
+    // 3. Mapear SKUs por family_id
+    var skus_map = {};
+    data_sku.forEach(function(s) {
+      if (!skus_map[s.family_id]) skus_map[s.family_id] = [];
+      skus_map[s.family_id].push(s);
+    });
+
+    // 4. Construir familias
+    familias = data_fam.map(function(f) {
+      return {
+        id: f.id,
+        nombre: f.family_name,
+        imagen: f.image_url,
+        skus: skus_map[f.id] || []
+      };
+    });
+
+    console.log('✅ ' + familias.length + ' familias cargadas');
+    return true;
+  } catch(e) {
+    console.error('Error Supabase:', e);
+    return false;
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function filtrar() {
+  var q = document.getElementById('busqueda').value.toLowerCase().trim();
+  familias_filtradas = familias.filter(function(f) {
+    if (!q) return true;
+    if (f.nombre.toLowerCase().includes(q)) return true;
+    return f.skus.some(function(s) {
+      return s.description.toLowerCase().includes(q) || s.sku.toLowerCase().includes(q);
+    });
+  });
+  pagina = 0;
+  document.getElementById('grid').innerHTML = '';
+  document.getElementById('section-label').textContent = familias_filtradas.length + ' productos';
+  cargarPagina();
+}
+
+function cargarPagina() {
+  if (cargando_pagina) return;
+  var desde = pagina * PAGINA_SIZE;
+  var lote = familias_filtradas.slice(desde, desde + PAGINA_SIZE);
+  if (!lote.length) return;
+  cargando_pagina = true;
+  renderLote(lote);
+  pagina++;
+  cargando_pagina = false;
+}
+
+function renderLote(lote) {
+  var grid = document.getElementById('grid');
+  lote.forEach(function(f) {
+    var esVar = f.skus.length > 1;
+    var s0 = f.skus[0] || {};
+    var qty_total = f.skus.reduce(function(t, s) { return t + (carrito[s.sku] || 0); }, 0);
+    var qty0 = carrito[s0.sku] || 0;
+
+    var acciones = esVar
+      ? '<button class="btn-var' + (qty_total > 0 ? ' activo' : '') + '" onclick="abrirModal(' + f.id + ')">'
+          + (qty_total > 0 ? '✓ ' + qty_total + ' en pedido' : 'Ver medidas (' + f.skus.length + ')') + '</button>'
+      : '<div class="qty-row">'
+          + '<button class="qty-menos" onclick="cambiarQty(\'' + s0.sku + '\',' + f.id + ',-1)">−</button>'
+          + '<span class="qty-num ' + (qty0 > 0 ? 'positivo' : '') + '" id="qt-' + s0.sku + '">' + qty0 + '</span>'
+          + '<button class="qty-mas" onclick="cambiarQty(\'' + s0.sku + '\',' + f.id + ',1)">+</button>'
+        + '</div>';
+
+    var card = document.createElement('div');
+    card.id = 'card-' + f.id;
+    card.className = 'prod-card' + (qty_total > 0 ? ' activo' : '');
+    card.innerHTML =
+      '<div class="prod-img">'
+        + (f.imagen
+            ? '<img src="' + f.imagen + '" alt="' + f.nombre + '" loading="lazy" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+            + '<div style="display:none;font-size:36px;width:100%;height:100%;align-items:center;justify-content:center">📦</div>'
+            : '<span style="font-size:36px">📦</span>')
+        + (esVar ? '<span class="badge-var">' + f.skus.length + ' medidas</span>' : '')
+      + '</div>'
+      + '<div class="prod-body">'
+        + '<div class="prod-nombre">' + f.nombre + '</div>'
+        + '<div class="prod-precio">' + (s0.precio_venta > 0 ? (esVar ? 'Desde ' : '') + fmt(s0.precio_venta) : 'Consultar') + '</div>'
+        + acciones
+      + '</div>';
+    grid.appendChild(card);
+  });
+}
+
+// ── CANTIDAD ──────────────────────────────────────────────────
+function cambiarQty(sku, fam_id, delta) {
+  carrito[sku] = Math.max(0, (carrito[sku] || 0) + delta);
+  if (carrito[sku] === 0) delete carrito[sku];
+  actualizarCard(fam_id);
+  actualizarBadge();
+}
+
+function actualizarCard(fam_id) {
+  var f = familias.find(function(x) { return x.id === fam_id; });
+  if (!f) return;
+  var card = document.getElementById('card-' + fam_id);
+  if (!card) return;
+  var qty_total = f.skus.reduce(function(t, s) { return t + (carrito[s.sku] || 0); }, 0);
+  card.className = 'prod-card' + (qty_total > 0 ? ' activo' : '');
+  
+  if (f.skus.length === 1) {
+    var s0 = f.skus[0];
+    var qty0 = carrito[s0.sku] || 0;
+    var num = document.getElementById('qt-' + s0.sku);
+    if (num) {
+      num.textContent = qty0;
+      num.className = 'qty-num' + (qty0 > 0 ? ' positivo' : '');
+    }
+  } else {
+    var btn = card.querySelector('.btn-var');
+    if (btn) {
+      btn.className = 'btn-var' + (qty_total > 0 ? ' activo' : '');
+      btn.textContent = qty_total > 0 ? '✓ ' + qty_total + ' en pedido' : 'Ver medidas (' + f.skus.length + ')';
+    }
+  }
+}
+
+// ── MODAL VARIANTES ───────────────────────────────────────────
+function abrirModal(fam_id) {
+  var f = familias.find(function(x) { return x.id === fam_id; });
+  if (!f) return;
+  modal_familia = f;
+  document.getElementById('modal-titulo').textContent = f.nombre;
+  var img = document.getElementById('modal-img');
+  if (f.imagen) { img.src = f.imagen; img.style.display = 'block'; }
+  else { img.style.display = 'none'; }
+  
+  var html = '';
+  f.skus.forEach(function(s) {
+    var qty = carrito[s.sku] || 0;
+    html += '<div class="variante-row">'
+      + '<div class="variante-nombre">' + s.description + '</div>'
+      + '<div class="variante-precio">' + (s.precio_venta > 0 ? fmt(s.precio_venta) : 'Consultar') + '</div>'
+      + '<div class="variante-qty">'
+        + '<button class="v-menos" onclick="cambiarQtyModal(\'' + s.sku + '\',' + fam_id + ',-1)">−</button>'
+        + '<span class="v-num" id="vm-' + s.sku + '">' + qty + '</span>'
+        + '<button class="v-mas" onclick="cambiarQtyModal(\'' + s.sku + '\',' + fam_id + ',1)">+</button>'
+      + '</div>'
+    + '</div>';
+  });
+  document.getElementById('modal-variantes').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function cambiarQtyModal(sku, fam_id, delta) {
+  carrito[sku] = Math.max(0, (carrito[sku] || 0) + delta);
+  if (carrito[sku] === 0) delete carrito[sku];
+  var num = document.getElementById('vm-' + sku);
+  if (num) num.textContent = carrito[sku] || 0;
+  actualizarCard(fam_id);
+  actualizarBadge();
+}
+
+function cerrarModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+// ── CARRITO ───────────────────────────────────────────────────
+function actualizarBadge() {
+  var total = Object.values(carrito).reduce(function(t, q) { return t + q; }, 0);
+  document.getElementById('badge-total').textContent = total;
+}
+
+function abrirCarrito() {
+  var items = Object.keys(carrito);
+  if (!items.length) { alert('Tu pedido está vacío.'); return; }
+  
+  var html = '';
+  var total = 0;
+  items.forEach(function(sku) {
+    var qty = carrito[sku];
+    // Buscar el SKU en todas las familias
+    var sku_data = null;
+    familias.forEach(function(f) {
+      f.skus.forEach(function(s) { if (s.sku === sku) sku_data = s; });
+    });
+    if (!sku_data) return;
+    var subtotal = (sku_data.precio_venta || 0) * qty;
+    total += subtotal;
+    html += '<div class="carrito-item">'
+      + '<div class="carrito-item-nombre">' + sku_data.description
+        + '<div class="carrito-item-qty">Código: ' + sku + ' · Cant: ' + qty + '</div>'
+      + '</div>'
+      + '<div class="carrito-item-precio">' + fmt(subtotal) + '</div>'
+    + '</div>';
+  });
+  
+  document.getElementById('carrito-items').innerHTML = html;
+  document.getElementById('carrito-total-precio').textContent = fmt(total);
+  document.getElementById('carrito-panel').classList.add('open');
+}
+
+function cerrarCarrito(e) {
+  if (!e || e.target === document.getElementById('carrito-panel')) {
+    document.getElementById('carrito-panel').classList.remove('open');
+  }
+}
+
+function vaciarCarrito() {
+  carrito = {};
+  actualizarBadge();
+  document.querySelectorAll('.prod-card').forEach(function(c) { c.classList.remove('activo'); });
+  cerrarCarrito();
+  filtrar();
+}
+
+function enviarPedido() {
+  var items = Object.keys(carrito);
+  if (!items.length) return;
+  var msg = '🛒 *Pedido Dosting Toys*\n\n';
+  items.forEach(function(sku) {
+    var qty = carrito[sku];
+    var sku_data = null;
+    familias.forEach(function(f) {
+      f.skus.forEach(function(s) { if (s.sku === sku) sku_data = s; });
+    });
+    if (sku_data) msg += '• ' + sku + ' — ' + sku_data.description + ' x' + qty + '\n';
+  });
+  msg += '\n_Enviado desde el portal de pedidos_';
+  window.open('https://wa.me/573332374299?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ── SCROLL INFINITO ───────────────────────────────────────────
+var observer = new IntersectionObserver(function(entries) {
+  if (entries[0].isIntersecting && !cargando_pagina) cargarPagina();
+}, { rootMargin: '200px' });
+observer.observe(document.getElementById('sentinel'));
+
+// ── INICIAR ───────────────────────────────────────────────────
+async function iniciar() {
+  var ok = await cargarDatos();
+  if (ok && familias.length > 0) {
+    filtrar();
+  } else {
+    document.getElementById('grid').innerHTML = '<div class="empty">⚠️ No se pudieron cargar los productos. Intenta recargar la página.</div>';
+    document.getElementById('section-label').textContent = 'Error al cargar';
+  }
+}
+
+iniciar();
+</script>
+</body>
+</html>
